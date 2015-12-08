@@ -1,6 +1,5 @@
 package com.azoomee.controller;
 
-import com.azoomee.controller.DepartmentController;
 import com.azoomee.model.Department;
 import com.azoomee.service.DepartmentService;
 import org.mockito.Mock;
@@ -28,7 +27,7 @@ public class DepartmentControllerTest{
 	}
 
 	@Test
-	public void givenACorrectDepartmentRequest_whenDoingAPost_thenItShouldCreateTheResourceAndReturnIt(){
+	public void givenACorrectDepartment_whenDoingAPost_thenItShouldCreateTheResourceAndReturnIt(){
 		final Department department = new Department();
 		givenDepartmentServiceStub(department);
 

@@ -1,8 +1,7 @@
 package com.azoomee.repository;
 
-/**
- * Created by bogdanteut on 12/8/15.
- */
-public class DepartmentRepository
-{
+import com.azoomee.model.Department;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface DepartmentRepository extends JpaRepository<Department, Integer>{
 }

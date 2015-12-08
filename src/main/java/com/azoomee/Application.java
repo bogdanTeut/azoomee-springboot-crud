@@ -1,8 +1,12 @@
 package com.azoomee;
 
-/**
- * Created by bogdanteut on 12/8/15.
- */
-public class Application
-{
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Application{
+
+	public static void main(String[] args){
+		SpringApplication.run(Application.class, args);
+	}
 }
