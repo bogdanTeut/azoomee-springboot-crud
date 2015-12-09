@@ -1,9 +1,11 @@
 package com.azoomee.controller;
 
 import com.azoomee.Application;
+import com.azoomee.TestsUtil;
 import com.azoomee.model.Department;
 import com.azoomee.repository.DepartmentRepository;
 import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.http.ContentType;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,14 +46,15 @@ public class DepartmentControllerIT{
 
 	@Test
 	public void givenAValidJsonDepartmentRequest_whenAPostIsBeingPerformed_thenItShouldBeStoredAndReturnA200(){
-		final Department department = new Department("1", "Sales");
+		final Department department = TestsUtil.givenDepartment();
 		given()
-				.contentType("application/json")
+				.contentType(ContentType.JSON)
 				.body(department)
 		.when()
 				.post("/department")
 		.then()
 				.statusCode(HttpStatus.OK.value())
+				.contentType(ContentType.JSON)
 				.body("departmentID", Matchers.is("1"))
 				.body("name", Matchers.is("Sales"));
 
@@ -60,16 +63,46 @@ public class DepartmentControllerIT{
 	}
 
 	@Test
+	public void givenAnNonJsonDepartmentRequest_whenAPostIsBeingPerformed_thenItShouldReturnA415(){
+		given()
+				.contentType(ContentType.XML)
+				.body("{\"departmentID\":\"1\", \"name\":\"Sales\"}")
+		.when()
+				.post("/department")
+		.then()
+				.statusCode(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value())
+				.body(Matchers.is("Request was not in a json format"));
+		verifyDB(0);
+	}
+
+	//more negative scenarios to be added. For the time being only checking if "name" field is missing.
+	@Test
 	public void givenAValidInvalidJsonDepartmentRequest_whenAPostIsBeingPerformed_thenItShouldReturnA400(){
 		given()
-				.contentType("application/json")
+				.contentType(ContentType.JSON)
 				.body("{\"departmentID\":\"1\"}")
 		.when()
 				.post("/department")
 		.then()
-				.statusCode(HttpStatus.BAD_REQUEST.value());
-
+				.statusCode(HttpStatus.BAD_REQUEST.value())
+				.body(Matchers.is("[\"Field [name] validation failed due to reason: [may not be null]\"]"));
 		verifyDB(0);
+	}
+
+	@Test
+	public void givenAValidJsonDepartmentRequestWithAnIdAlreadyExisting_whenAPostIsBeingPerformed_thenItShouldReturnA409(){
+		final Department department = TestsUtil.givenDepartment();
+		departmentRepository.save(department);
+
+		given()
+				.contentType(ContentType.JSON)
+				.body(department)
+		.when()
+				.post("/department")
+		.then()
+				.statusCode(HttpStatus.CONFLICT.value())
+				.body(Matchers.is("There already exists a user with [id=1]"));
+		verifyDB(1);
 	}
 
 	private void verifyDB(final int size, final Department... departments){
